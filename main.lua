@@ -18,44 +18,23 @@ local MY_BITMASK = gg.REGION_ANONYMOUS | gg.REGION_C_ALLOC
 --------------------------------------------------
 -- MAP HACK NO ICON (UNCHANGED)
 --------------------------------------------------
+
+
 function APPLY_NO_ICON()
-    gg.clearResults()
-    gg.setRanges(MY_BITMASK)
-    
-    -- 1. Search for the QWORD pattern
-    gg.searchNumber("98,784,247,822;47,244,640,279", gg.TYPE_QWORD)
-    
-    local count = gg.getResultCount()
-    if count > 0 then
-        -- 2. Get the results
-        local results = gg.getResults(count)
-        local toSave = {}
-
-        -- 3. Filter only the specific address we want to change
-        for i, v in ipairs(results) do
-            if v.value == 98784247822 then 
-                toSave[#toSave + 1] = v 
-            end
-        end
-
-        -- 4. STEALTH WIPE: Save to List and Clear Search
-        if #toSave > 0 then
-            gg.addListItems(toSave) -- Moves it to the Saved Tab
-            gg.clearResults()       -- Deletes the search history
-            
-            -- 5. Modify the value from the Saved List
-            for i, v in ipairs(toSave) do
-                v.value = 98784247823
-            end
-            gg.setValues(toSave)
-            
-            gg.toast("🚫 Stealth Icon Hack Activated & Wiped")
-        else
-            gg.toast("⚠️ Pattern found but target QWORD missing")
-        end
-    else
-        gg.toast("❌ No Icon Pattern not found.")
-    end
+    gg.clearResults()
+    gg.setRanges(MY_BITMASK)
+    gg.searchNumber("98,784,247,822;47,244,640,279", gg.TYPE_QWORD)
+    local results = gg.getResults(gg.getResultCount())
+    if #results > 0 then
+        for i, v in ipairs(results) do
+            if v.value == 98784247822 then v.value = 98784247823 end
+        end
+        gg.setValues(results)
+        gg.toast("🚫 MapHack No Icon Activated")
+    else
+        gg.toast("❌ No Icon Pattern not found.")
+gg.clearResults()
+    end
 end
 
 
@@ -68,34 +47,22 @@ function ULTIMATE_MAPHACK()
     
     local count = gg.getResultCount()
     if count > 0 then
-        -- 2. Get the top candidates
+        -- 2. Get the candidates (limiting to stay safe)
         local limit = (count > 10) and 10 or count
         local results = gg.getResults(limit)
-        local toSave = {}
-
-        -- 3. Filter and prepare to save
+        
+        -- 3. Your Manual Filter Logic
         for i, v in ipairs(results) do 
-            if v.value == 2.5 then 
-                toSave[#toSave + 1] = v
+            if v.value == 2.25 then 
+                v.value = 5 
             end
         end
-
-        -- 4. SAVE TO LIST and CLEAR SEARCH (The Wipe)
-        if #toSave > 0 then
-            gg.addListItems(toSave) -- Adds them to the Saved List tab
-            gg.clearResults()       -- Wipes the active search engine
-            gg.toast("🧹 Search Cleared. Editing from Saved List...")
-            
-            -- 5. Edit the values in the Saved List
-            -- We change them to 5 and update them in the memory
-            for i, v in ipairs(toSave) do
-                v.value = 5
-            end
-            gg.setValues(toSave)
-            gg.toast("✅ Stealth Maphack ACTIVE")
-        end
+        
+        gg.setValues(results)
+        gg.toast("✅ Ultimate Maphack ON")
     else
-        gg.toast("🚫 Pattern not found")
+        gg.toast("🚫 Maphack values not found")
+        gg.clearResults()
     end
 end
 
@@ -165,6 +132,7 @@ local function applyDrone(level)
     gg.loadResults(V5); gg.getResults(#V5); gg.editAll(p[5], gg.TYPE_FLOAT); gg.clearResults()
 
     gg.toast("Drone View X" .. level .. " ON")
+    
 end
 
 --------------------------------------------------
@@ -226,3 +194,8 @@ if expired() then
     gg.alert("Script expired")
     os.exit()
 end
+
+
+
+
+
