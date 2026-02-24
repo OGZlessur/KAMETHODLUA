@@ -1,149 +1,151 @@
 --------------------------------------------------
--- KAMETHOD CLOUD v2.7
+-- KAMETHOD CLOUD v3.2 [MLBB ULTIMATE EDITION]
 --------------------------------------------------
 gg.setVisible(false)
 
-local MY_BITMASK = gg.REGION_ANONYMOUS | gg.REGION_C_ALLOC | gg.REGION_C_BSS 
-local drone_scanned = false
-local map_scanned = false
+-- Memory Configuration
+local MY_BITMASK = gg.REGION_ANONYMOUS | gg.REGION_C_ALLOC
 local drone_lvl = 5
+local drone_scanned = false
 
--- Tables to store the memory addresses found during scanning
-local V1, V2, V3, V4, V5 = {}, {}, {}, {}, {} -- Drone addresses
-local MAP_REVEAL_ADDR = {} -- Maphack addresses
+-- Data Tables
+local V1, V2, V3, V4, V5 = {}, {}, {}, {}, {}
 
 --------------------------------------------------
--- 🛠️ SCANNING LOGIC
+-- 🛠️ 1. ICON MAPHACK (QWORD SIGNATURES)
 --------------------------------------------------
+function APPLY_ICON_HACK()
+    gg.setRanges(gg.REGION_ANONYMOUS)
+    gg.toast("🔍 Syncing Icon Signatures...")
 
--- 1. Scan for Maphack Reveal
-function SCAN_MAPHACK()
+    -- ICON V1
+    gg.clearResults()
+    gg.searchNumber("4616189618054758400Q;72057594037927936Q", gg.TYPE_QWORD)
+    if gg.getResultCount() > 0 then
+        local r = gg.getResults(100)
+        for i, v in ipairs(r) do
+            if v.value == 4616189618054758400 then v.value = 4616189618054758401 end
+        end
+        gg.setValues(r)
+    end
+
+    -- ICON V2
+    gg.clearResults()
+    gg.searchNumber("4619567317775286272Q;1103806595072Q;1103806595072Q;282574488338432Q", gg.TYPE_QWORD)
+    if gg.getResultCount() > 0 then
+        local r = gg.getResults(100)
+        for i, v in ipairs(r) do
+            if v.value == 4619567317775286272 then v.value = 4619567317775286273 end
+        end
+        gg.setValues(r)
+    end
+
+    -- ICON V3
+    gg.clearResults()
+    gg.searchNumber("4621256167635550208Q;1099511627776Q", gg.TYPE_QWORD)
+    if gg.getResultCount() > 0 then
+        local r = gg.getResults(100)
+        for i, v in ipairs(r) do
+            if v.value == 4621256167635550208 then v.value = 4621256167635550209 end
+        end
+        gg.setValues(r)
+    end
+    gg.toast("✅ Icons Synced")
+end
+
+--------------------------------------------------
+-- 🛠️ 2. ULTIMATE MAPHACK (HEX RENDERING)
+--------------------------------------------------
+function APPLY_ULTIMATE_HEX()
     gg.clearResults()
     gg.setRanges(MY_BITMASK)
-    gg.toast("🔍 Scanning Map Values...")
-    gg.searchNumber("2.25F;9.18354962e-41F;1.40129846e-45F", gg.TYPE_FLOAT)
-    gg.refineNumber("2.25", gg.TYPE_FLOAT)
+    gg.toast("🔍 Scanning Rendering Hex...")
+    
+    -- Search for Client-Side Visual Signature
+    gg.searchNumber("40100000h;3C23D70Ah;3F800000h::12", gg.TYPE_DWORD)
+    gg.refineNumber("40100000h", gg.TYPE_DWORD)
     
     local count = gg.getResultCount()
     if count > 0 then
-        MAP_REVEAL_ADDR = gg.getResults(count)
-        map_scanned = true
-        gg.toast("✅ Map Data Found: " .. count)
+        local results = gg.getResults(count)
+        for i, v in ipairs(results) do
+            v.value = "40A00000h" -- Set to 5.0F
+        end
+        gg.setValues(results)
+        gg.toast("✅ Ultimate Reveal ON")
     else
-        map_scanned = false
-        gg.alert("❌ Map values not found. Are you in a match?")
+        gg.toast("❌ Hex Reveal Not Found")
     end
 end
 
--- 2. Scan for Drone View
+--------------------------------------------------
+-- 🛠️ 3. DRONE VIEW LOGIC
+--------------------------------------------------
 function SCAN_DRONE()
-    gg.clearResults()
-    gg.setRanges(MY_BITMASK)
-    gg.toast("📡 Searching Drone Pointers...")
-    
+    gg.setRanges(gg.REGION_ANONYMOUS)
     local function get(val)
+        gg.clearResults()
         gg.searchNumber(val, gg.TYPE_FLOAT)
         local res = gg.getResults(100)
-        gg.clearResults()
         return res
     end
-
-    V1 = get("7.65999984741"); V2 = get("-10.97999954224")
-    V3 = get("7.61999988556"); V4 = get("-7.65999984741")
-    V5 = get("-7.61999988556")
-
-    if #V1 > 0 then
-        drone_scanned = true
-        gg.toast("✅ Drone Data Cached")
-    else
-        drone_scanned = false
-        gg.alert("❌ Drone not found!")
-    end
-end
-
---------------------------------------------------
--- 🚀 APPLY LOGIC (NO FREEZE)
---------------------------------------------------
-
-function APPLY_MAPHACK()
-    if not map_scanned then gg.alert("⚠️ Scan Maphack First!") return end
-    for i, v in ipairs(MAP_REVEAL_ADDR) do
-        v.value = 5
-    end
-    gg.setValues(MAP_REVEAL_ADDR)
-    gg.toast("🔥 Maphack Applied")
+    V1=get("7.65999984741"); V2=get("-10.97999954224"); V3=get("7.61999988556")
+    V4=get("-7.65999984741"); V5=get("-7.61999988556")
+    if #V1 > 0 then drone_scanned = true; gg.toast("✅ Drone Ready") else gg.toast("❌ Drone Not Found") end
 end
 
 function APPLY_DRONE(lvl)
-    if not drone_scanned then gg.alert("⚠️ Scan Drone First!") return end
-    local preset = {
+    if not drone_scanned then return end
+    local p = {
         [1]={13.04,-18.25,12.96,-13.04,-12.96}, [2]={15.04,-20.75,14.96,-15.04,-14.96},
         [3]={17.04,-22.15,16.96,-17.04,-16.96}, [4]={19.04,-24.15,18.96,-19.04,-18.96},
         [5]={21.04,-26.15,20.96,-21.04,-20.96}, [6]={23.04,-28.15,22.96,-23.04,-22.96},
         [7]={25.04,-30.15,24.96,-25.04,-24.96}, [8]={27.04,-32.15,26.96,-27.04,-26.96},
         [9]={29.04,-34.15,28.96,-29.04,-28.96}, [10]={31.04,-36.15,30.96,-31.04,-30.96}
     }
-    local p = preset[lvl]
-    local function edit(t, val)
-        if #t > 0 then
-            for i, v in ipairs(t) do v.value = val end
-            gg.setValues(t)
-        end
-    end
-    edit(V1, p[1]); edit(V2, p[2]); edit(V3, p[3]); edit(V4, p[4]); edit(V5, p[5])
-    gg.toast("🚁 Drone X" .. lvl .. " Applied")
-end
-
--- Maphack No Icon (Doesn't need separate scan because it's a direct pattern search/replace)
-function APPLY_NO_ICON()
-    gg.clearResults()
-    gg.setRanges(MY_BITMASK)
-    gg.searchNumber("98,784,247,822;47,244,640,279", gg.TYPE_QWORD)
-    local results = gg.getResults(gg.getResultCount())
-    if #results > 0 then
-        for i, v in ipairs(results) do
-            if v.value == 98784247822 then v.value = 98784247823 end
-        end
-        gg.setValues(results)
-        gg.toast("🚫 No Icon Applied")
-    else
-        gg.toast("❌ No Icon Not Found")
-    end
+    local v = p[lvl]
+    local function ed(t, val) if #t > 0 then for _, i in ipairs(t) do i.value = val end gg.setValues(t) end end
+    ed(V1, v[1]); ed(V2, v[2]); ed(V3, v[3]); ed(V4, v[4]); ed(V5, v[5])
+    gg.toast("🚁 Drone Level " .. lvl)
 end
 
 --------------------------------------------------
--- 📱 USER MENU
+-- 📱 MASTER MENU
 --------------------------------------------------
 while true do
     if gg.isVisible(true) then
         gg.setVisible(false)
         
-        local mStatus = map_scanned and "🟢" or "🔴"
-        local dStatus = drone_scanned and "🟢" or "🔴"
+        local dStat = drone_scanned and "🟢" or "🔴"
         
         local m = gg.choice({
-            "🛰️ [1] SCAN MAPHACK " .. mStatus,
-            "👁️ [2] APPLY MAPHACK",
-            "📡 [3] SCAN DRONE " .. dStatus,
+            "⚡ [ AUTO SYNC ALL ]",
+            "🖼️ [1] SYNC ICON SIGNATURES",
+            "🛰️ [2] APPLY ULTIMATE MAPHACK",
+            "📡 [3] SCAN DRONE DATA " .. dStat,
             "🚁 [4] APPLY DRONE (Level: " .. drone_lvl .. ")",
-            "🚫 [5] NO ICON MAPHACK",
-            "⚙️ [6] SET DRONE LEVEL",
-            "🧹 [7] RESET ALL / LOBBY",
+            "⚙️ [5] CHANGE DRONE LEVEL",
+            "🧹 [RESET FOR NEXT MATCH]",
             "❌ EXIT"
-        }, nil, "🛡️ KAMETHOD VIP v2.7\nSelect Scans first, then Apply.")
+        }, nil, "🛡️ KAMETHOD MLBB VIP v3.2")
 
-        if m == 1 then SCAN_MAPHACK() end
-        if m == 2 then APPLY_MAPHACK() end
-        if m == 3 then SCAN_DRONE() end
-        if m == 4 then APPLY_DRONE(drone_lvl) end
-        if m == 5 then APPLY_NO_ICON() end
+        if m == 1 then 
+            APPLY_ICON_HACK()
+            APPLY_ULTIMATE_HEX()
+            SCAN_DRONE()
+            APPLY_DRONE(drone_lvl)
+        end
+        if m == 2 then APPLY_ICON_HACK() end
+        if m == 3 then APPLY_ULTIMATE_HEX() end
+        if m == 4 then SCAN_DRONE() end
+        if m == 5 then APPLY_DRONE(drone_lvl) end
         if m == 6 then 
-            local p = gg.prompt({"Set Level (1-10)"}, {drone_lvl}, {"number"})
+            local p = gg.prompt({"Drone Level (1-10)"}, {drone_lvl}, {"number"})
             if p then drone_lvl = tonumber(p[1]) end
         end
         if m == 7 then 
-            map_scanned = false; drone_scanned = false
-            MAP_REVEAL_ADDR = {}; V1, V2, V3, V4, V5 = {}, {}, {}, {}, {}
+            drone_scanned = false
+            V1, V2, V3, V4, V5 = {}, {}, {}, {}, {}
             gg.clearResults(); gg.toast("🧹 Memory Purged")
         end
         if m == 8 then os.exit() end
