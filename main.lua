@@ -131,8 +131,7 @@ local function applyDrone(level)
     gg.loadResults(V4); gg.getResults(#V4); gg.editAll(p[4], gg.TYPE_FLOAT); gg.clearResults()
     gg.loadResults(V5); gg.getResults(#V5); gg.editAll(p[5], gg.TYPE_FLOAT); gg.clearResults()
 
-    gg.toast("Drone View X" .. level .. " ON")
-    
+    gg.toast("Drone View X" .. level .. " ON")   
 end
 
 --------------------------------------------------
