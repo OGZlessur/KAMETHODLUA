@@ -41,7 +41,7 @@ function ULTIMATE_MAPHACK()
     
     -- 1. Search for the pattern
     gg.searchNumber("2.25F;9.18354962e-41F;1.40129846e-45F", gg.TYPE_FLOAT)
-    gg.refineNumber("2.25", gg.TYPE_FLOAT)
+   --- dont refine gg.refineNumber("2.25", gg.TYPE_FLOAT)
     
     -- 2. Get the count, but limit it to a max of 50
     local count = gg.getResultCount()
