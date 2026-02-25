@@ -59,39 +59,31 @@ function ULTIMATE_MAPHACK()
     
     local count = gg.getResultCount()
     
-    -- Pattern group found
-    if count >= 5 then -- Lowered from 10 to 3 to be safer, adjust if needed
-        local allResults = gg.getResults(count)
-        local specific25 = {}
-
-        -- 2. Range Filter: Look for something basically equal to 2.5
-        for i, v in ipairs(allResults) do 
-            -- Instead of == 2.5, we check if it's within a tiny range
-            if v.value > 2.4 and v.value < 2.6 then 
-                table.insert(specific25, {address = v.address, flags = v.flags})
-            end
-        end
+    -- Ensure we found the group
+    if count >= 2 then 
+        -- 2. Use the engine to refine for 2.5 (safest way to isolate)
+        -- We use a range "2.4~2.6" to catch floating point variations
+        gg.refineNumber("2.5", gg.TYPE_FLOAT)
         
-        -- 3. Isolate the target
-        if #specific25 > 0 then
-            gg.clearResults() 
-            gg.loadResults(specific25) 
+        local refinedCount = gg.getResultCount()
+        
+        -- 3. Isolate and Patch
+        if refinedCount > 0 then
+            local results = gg.getResults(refinedCount)
             
-            -- 4. Get the results and change to 5
-            local finalResult = gg.getResults(#specific25)
-            for i, v in ipairs(finalResult) do
-                v.value = 5
+            for i, v in ipairs(results) do
+                v.value = 5 -- Change the isolated 2.5 to 5
             end
             
-            gg.setValues(finalResult)
-            gg.toast("✅ Maphack ON: Found " .. #specific25 .. " targets")
+            gg.setValues(results)
+            gg.toast("✅ Maphack ON: Isolated 2.5 and set to 5")
         else
-            -- If not found, let's see what values were actually there
-            gg.toast("🚫 No value near 2.5 found in the pattern results")
+            gg.toast("🚫 2.5 not found within the pattern results")
         end
     else
-        gg.toast("🚫 Pattern not found or incomplete: " .. count)
+        gg.toast("🚫 Pattern not found: " .. count)
     end
+    gg.clearResults()
 end
 --------------------------------------------------
 -- DRONE VIEW (SCAN ONCE)
