@@ -59,37 +59,38 @@ function ULTIMATE_MAPHACK()
     
     local count = gg.getResultCount()
     
-    -- We wait until we have our block of 10+ results
-    if count >= 10 then
+    -- Pattern group found
+    if count >= 5 then -- Lowered from 10 to 3 to be safer, adjust if needed
         local allResults = gg.getResults(count)
         local specific25 = {}
 
-        -- 2. Manually look for the 2.5 among the 10 results
+        -- 2. Range Filter: Look for something basically equal to 2.5
         for i, v in ipairs(allResults) do 
-            if v.value == 2.5 then 
-                -- We found it! Add only this one to our specific list
+            -- Instead of == 2.5, we check if it's within a tiny range
+            if v.value > 2.4 and v.value < 2.6 then 
                 table.insert(specific25, {address = v.address, flags = v.flags})
             end
         end
         
-        -- 3. Now "Refine" by loading ONLY the 2.5 we found back into the results
+        -- 3. Isolate the target
         if #specific25 > 0 then
-            gg.clearResults() -- Clear the 10 junk results
-            gg.loadResults(specific25) -- Load only the 2.5 addresses
+            gg.clearResults() 
+            gg.loadResults(specific25) 
             
-            -- 4. Get the result and change it to 5
+            -- 4. Get the results and change to 5
             local finalResult = gg.getResults(#specific25)
             for i, v in ipairs(finalResult) do
                 v.value = 5
             end
             
             gg.setValues(finalResult)
-            gg.toast("✅ Maphack ON: 2.5 isolated and changed to 5")
+            gg.toast("✅ Maphack ON: Found " .. #specific25 .. " targets")
         else
-            gg.toast("🚫 2.5 not found within the 10 results")
+            -- If not found, let's see what values were actually there
+            gg.toast("🚫 No value near 2.5 found in the pattern results")
         end
     else
-        gg.toast("🚫 Need 10 results, but only found: " .. count)
+        gg.toast("🚫 Pattern not found or incomplete: " .. count)
     end
 end
 --------------------------------------------------
