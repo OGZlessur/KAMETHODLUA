@@ -2,6 +2,19 @@
 -- DRONE VIEW + MAPHACK NO ICON (FIXED)
 --------------------------------------------------
 
+-- 1. EXPIRATION CHECK FIRST
+local function expired()
+    local e = {2026, 4, 11}
+    local n = os.date("*t")
+    return (n.year > e[1]) or (n.year == e[1] and n.month > e[2])
+        or (n.year == e[1] and n.month == e[2] and n.day > e[3])
+end
+
+if expired() then
+    gg.alert("Script expired")
+    os.exit()
+end
+
 gg.setVisible(false)
 gg.clearResults()
 
@@ -15,57 +28,70 @@ if not info then
 end
 
 local MY_BITMASK = gg.REGION_ANONYMOUS | gg.REGION_C_ALLOC
+
 --------------------------------------------------
 -- MAP HACK NO ICON (UNCHANGED)
 --------------------------------------------------
 
-
 function APPLY_NO_ICON()
-    gg.clearResults()
-    gg.setRanges(MY_BITMASK)
-    gg.searchNumber("98,784,247,822;47,244,640,279", gg.TYPE_QWORD)
-    local results = gg.getResults(gg.getResultCount())
-    if #results > 0 then
-        for i, v in ipairs(results) do
-            if v.value == 98784247822 then v.value = 98784247823 end
-        end
-        gg.setValues(results)
-        gg.toast("🚫 MapHack No Icon Activated")
-    else
-        gg.toast("❌ No Icon Pattern not found.")
-gg.clearResults()
-    end
+    gg.clearResults()
+    gg.setRanges(MY_BITMASK)
+    gg.searchNumber("98,784,247,822;47,244,640,279", gg.TYPE_QWORD)
+    local results = gg.getResults(gg.getResultCount())
+    if #results > 0 then
+        for i, v in ipairs(results) do
+            if v.value == 98784247822 then v.value = 98784247823 end
+        end
+        gg.setValues(results)
+        gg.toast("🚫 MapHack No Icon Activated")
+    else
+        gg.toast("❌ No Icon Pattern not found.")
+    end
+    gg.clearResults()
 end
-
 
 function ULTIMATE_MAPHACK()
     gg.clearResults()
     gg.setRanges(MY_BITMASK)
     
-    -- 1. Search for the pattern
+    -- 1. Search for the pattern group
     gg.searchNumber("2.25F;9.18354962e-41F;1.40129846e-45F", gg.TYPE_FLOAT)
     
     local count = gg.getResultCount()
-    if count > 0 then
-        -- 2. Get the candidates (limiting to stay safe)
-        local limit = (count > 10) and 10 or count
-        local results = gg.getResults(limit)
-        
-        -- 3. Your Manual Filter Logic
-        for i, v in ipairs(results) do 
-            if v.value == 2.25 then 
-                v.value = 5 
+    
+    -- We wait until we have our block of 10+ results
+    if count >= 10 then
+        local allResults = gg.getResults(count)
+        local specific25 = {}
+
+        -- 2. Manually look for the 2.5 among the 10 results
+        for i, v in ipairs(allResults) do 
+            if v.value == 2.5 then 
+                -- We found it! Add only this one to our specific list
+                table.insert(specific25, {address = v.address, flags = v.flags})
             end
         end
         
-        gg.setValues(results)
-        gg.toast("✅ Ultimate Maphack ON")
+        -- 3. Now "Refine" by loading ONLY the 2.5 we found back into the results
+        if #specific25 > 0 then
+            gg.clearResults() -- Clear the 10 junk results
+            gg.loadResults(specific25) -- Load only the 2.5 addresses
+            
+            -- 4. Get the result and change it to 5
+            local finalResult = gg.getResults(#specific25)
+            for i, v in ipairs(finalResult) do
+                v.value = 5
+            end
+            
+            gg.setValues(finalResult)
+            gg.toast("✅ Maphack ON: 2.5 isolated and changed to 5")
+        else
+            gg.toast("🚫 2.5 not found within the 10 results")
+        end
     else
-        gg.toast("🚫 Maphack values not found")
-        gg.clearResults()
+        gg.toast("🚫 Need 10 results, but only found: " .. count)
     end
 end
-
 --------------------------------------------------
 -- DRONE VIEW (SCAN ONCE)
 --------------------------------------------------
@@ -143,32 +169,20 @@ while true do
 
         local m = gg.prompt(
             {
-                "👁️ [MAP] Map Hack Icon", -- m[1]
-                "🚫 [ICON] Map Hack No Icon",    -- m[2]
-                "📡 [DRONE] Initial Data Scan",       -- m[3]
-                "🚁 [DRONE] View Height (1-10)"        -- m[4]
+                "👁️ [MAP] Map Hack Icon",
+                "🚫 [ICON] Map Hack No Icon",
+                "📡 [DRONE] Initial Data Scan",
+                "🚁 [DRONE] View Height (1-10)"
             },
             {false, false, false, 1},
             {"checkbox", "checkbox", "checkbox", "number"}
         )
 
         if m then
-            -- 1. Ultimate Maphack (Safe 50 Logic)
-            if m[1] then 
-                ULTIMATE_MAPHACK() 
-            end
+            if m[1] then ULTIMATE_MAPHACK() end
+            if m[2] then APPLY_NO_ICON() end
+            if m[3] then scanDrone() end
             
-            -- 2. No Icon Logic (QWORD Logic)
-            if m[2] then 
-                APPLY_NO_ICON() 
-            end
-            
-            -- 3. Drone Scan Logic (Run once per match)
-            if m[3] then 
-                scanDrone() 
-            end
-            
-            -- 4. Drone Apply Logic
             local lvl = tonumber(m[4])
             if lvl and lvl >= 1 and lvl <= 10 then
                 applyDrone(lvl)
@@ -179,22 +193,3 @@ while true do
     end
     gg.sleep(300)
 end
-
-
-
-local function expired()
-    local e = {2026,4,11}
-    local n = os.date("*t")
-    return (n.year>e[1]) or (n.year==e[1] and n.month>e[2])
-        or (n.year==e[1] and n.month==e[2] and n.day>e[3])
-end
-
-if expired() then
-    gg.alert("Script expired")
-    os.exit()
-end
-
-
-
-
-
