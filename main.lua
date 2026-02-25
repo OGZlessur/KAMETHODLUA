@@ -63,7 +63,7 @@ function ULTIMATE_MAPHACK()
     local count = gg.getResultCount()
     
     -- 3. Safety Check: Only patch if the count is reasonable (e.g., less than 50)
-    if count > 0 and count < 10 then
+    if count > 0 and count < 50 then
         local results = gg.getResults(count)
         for i, v in ipairs(results) do 
             v.value = 5 
