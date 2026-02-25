@@ -52,37 +52,30 @@ end
 
 function ULTIMATE_MAPHACK()
     gg.clearResults()
-    gg.setRanges(MY_BITMASK)
+    gg.setRanges(gg.REGION_ANONYMOUS)
     
-    -- 1. Search for the pattern group
+    -- 1. Your pattern search
     gg.searchNumber("2.25F;9.18354962e-41F;1.40129846e-45F", gg.TYPE_FLOAT)
+    
+    -- 2. Your refine logic
+    gg.refineNumber("2.25", gg.TYPE_FLOAT)
     
     local count = gg.getResultCount()
     
-    -- Ensure we found the group
-    if count >= 2 then 
-        -- 2. Use the engine to refine for 2.5 (safest way to isolate)
-        -- We use a range "2.4~2.6" to catch floating point variations
-        gg.refineNumber("2.5", gg.TYPE_FLOAT)
-        
-        local refinedCount = gg.getResultCount()
-        
-        -- 3. Isolate and Patch
-        if refinedCount > 0 then
-            local results = gg.getResults(refinedCount)
-            
-            for i, v in ipairs(results) do
-                v.value = 5 -- Change the isolated 2.5 to 5
-            end
-            
-            gg.setValues(results)
-            gg.toast("✅ Maphack ON: Isolated 2.5 and set to 5")
-        else
-            gg.toast("🚫 2.5 not found within the pattern results")
+    -- 3. Safety Check: Only patch if the count is reasonable (e.g., less than 50)
+    if count > 0 and count < 10 then
+        local results = gg.getResults(count)
+        for i, v in ipairs(results) do 
+            v.value = 5 
         end
+        gg.setValues(results)
+        gg.toast("✅ Ultimate Maphack ON (" .. count .. " values)")
+    elseif count >= 50 then
+        gg.alert("⚠️ Warning: Found " .. count .. " values. This is too many and might crash the game. Try restarting the match.")
     else
-        gg.toast("🚫 Pattern not found: " .. count)
+        gg.toast("🚫 Values not found")
     end
+    
     gg.clearResults()
 end
 --------------------------------------------------
