@@ -52,7 +52,7 @@ end
 
 function ULTIMATE_MAPHACK()
     gg.clearResults()
-    gg.setRanges(gg.REGION_ANONYMOUS)
+    gg.setRanges(-2080835)
     
     -- 1. Your pattern search
     gg.searchNumber("2.25F;9.18354962e-41F;1.40129846e-45F", gg.TYPE_FLOAT)
@@ -63,14 +63,14 @@ function ULTIMATE_MAPHACK()
     local count = gg.getResultCount()
     
     -- 3. Safety Check: Only patch if the count is reasonable (e.g., less than 50)
-    if count > 0 and count < 50 then
+    if count > 0 and count < 10 then
         local results = gg.getResults(count)
         for i, v in ipairs(results) do 
             v.value = 5 
         end
         gg.setValues(results)
         gg.toast("✅ Ultimate Maphack ON (" .. count .. " values)")
-    elseif count >= 50 then
+    elseif count >= 20 then
         gg.alert("⚠️ Warning: Found " .. count .. " values. This is too many and might crash the game. Try restarting the match.")
     else
         gg.toast("🚫 Values not found")
