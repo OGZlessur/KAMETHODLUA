@@ -30,6 +30,40 @@ end
 local MY_BITMASK = gg.REGION_ANONYMOUS | gg.REGION_C_ALLOC
 
 --------------------------------------------------
+-- MAP HACK WITH ICON (NEWLY ADDED)
+--------------------------------------------------
+
+function APPLY_ICON()
+    gg.clearResults()
+    gg.setRanges(gg.REGION_ANONYMOUS)
+    gg.searchNumber("2.25F;9.18354962e-41F;1.40129846e-45F", gg.TYPE_FLOAT)
+    gg.refineNumber("2.25", gg.TYPE_FLOAT)
+    
+    -- Limit the count variable to 10 max
+    local count = gg.getResultsCount()
+    if count > 10 then count = 10 end 
+    
+    -- Only fetch the first 10 results
+    local results = gg.getResults(count)
+    
+    if count > 0 then
+        for i, v in ipairs(results) do
+            v.value = "5"
+            v.freeze = true
+        end
+        gg.addListItems(results)
+        
+        -- Use setValues instead of editAll to respect the 10-item limit
+        gg.setValues(results) 
+        
+        gg.toast("👁️ MapHack Icon Activated (Limit: 10)")
+    else
+        gg.toast("⚠️ Value not found. Are you in a match?")
+    end
+    gg.clearResults()
+end
+
+--------------------------------------------------
 -- MAP HACK NO ICON (UNCHANGED)
 --------------------------------------------------
 
@@ -50,34 +84,7 @@ function APPLY_NO_ICON()
     gg.clearResults()
 end
 
-function ULTIMATE_MAPHACK()
-    gg.clearResults()
-    gg.setRanges(-2080835)
-    
-    -- 1. Your pattern search
-    gg.searchNumber("2.25F;9.18354962e-41F;1.40129846e-45F", gg.TYPE_FLOAT)
-    
-    -- 2. Your refine logic
-    gg.refineNumber("2.25", gg.TYPE_FLOAT)
-    
-    local count = gg.getResultCount()
-    
-    -- 3. Safety Check: Only patch if the count is reasonable (e.g., less than 50)
-    if count > 0 and count < 10 then
-        local results = gg.getResults(count)
-        for i, v in ipairs(results) do 
-            v.value = 5 
-        end
-        gg.setValues(results)
-        gg.toast("✅ Ultimate Maphack ON (" .. count .. " values)")
-    elseif count >= 20 then
-        gg.alert("⚠️ Warning: Found " .. count .. " values. This is too many and might crash the game. Try restarting the match.")
-    else
-        gg.toast("🚫 Values not found")
-    end
-    
-    gg.clearResults()
-end
+
 --------------------------------------------------
 -- DRONE VIEW (SCAN ONCE)
 --------------------------------------------------
@@ -165,12 +172,15 @@ while true do
         )
 
         if m then
-            if m[1] then ULTIMATE_MAPHACK() end
+            if m[1] then APPLY_ICON() end
             if m[2] then APPLY_NO_ICON() end
             if m[3] then scanDrone() end
             
+            -- Only apply drone if the numeric value was changed or prompt accepted
             local lvl = tonumber(m[4])
             if lvl and lvl >= 1 and lvl <= 10 then
+                -- Optional: only apply if the drone checkbox was checked? 
+                -- Current logic applies it if numeric is valid.
                 applyDrone(lvl)
             else
                 gg.toast("⚠️ Use Drone Level 1-10 only")
