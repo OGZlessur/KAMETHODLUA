@@ -49,7 +49,7 @@ function APPLY_ICON()
     if count > 0 then
         for i, v in ipairs(results) do
             v.value = "5"
-            v.freeze = true
+            
         end
         gg.addListItems(results)
         
